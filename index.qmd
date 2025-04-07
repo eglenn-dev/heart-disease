@@ -1,0 +1,442 @@
+---
+title: "Heart Disease Data Analysis"
+subtitle: "heart disease analysis and building a prediction model"
+author: "Ethan Glenn"
+date: "2025-04-08"
+format:
+  html:
+    self-contained: true
+    page-layout: full
+    title-block-banner: true
+    toc: true
+    toc-depth: 3
+    toc-location: body
+    number-sections: false
+    html-math-method: katex
+    code-fold: true
+    code-summary: "Show the code"
+    code-overflow: wrap
+    code-copy: hover
+    code-tools:
+        source: false
+        toggle: true
+        caption: See code
+execute: 
+  warning: false    
+---
+
+```{python}
+#| echo: false
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+```
+
+## Background
+
+Heart disease remains a leading cause of morbidity and mortality worldwide. Early identification of individuals at high risk is crucial for timely intervention and prevention. This project is aimed to leverage machine learning to develop a predictive model for assessing the likelihood of heart disease based on patient clinical data. This data utilized was sources from the widely recognized UC Irvine Machine Learning Repository dataset. The objective of this is to build a reliable model that could potentially aid healthcare professionals in risk stratification. 
+
+## Exploring the Data
+
+First, let's take a looks at the data features, and the first few columns that we will be working with.
+
+```{python}
+#| echo: true
+df = pd.read_csv('heart-disease.csv')
+```
+
+```{python}
+df.head()
+```
+
+```{python}
+df.info()
+```
+
+Now I want to take a look at the distribution of our target, the num column. This column indicates the present of heart disease on a scale of 0-4. `0` being no presence, and `1-4` indicating beginning to severe heart disease. 
+
+```{python}
+df["num"].value_counts()
+```
+
+## Data Cleaning
+
+Before we get to training a model, we will make sure that the number of missing values is limited, and make sure we handel data outliers correctly. 
+
+First we will check a few things, such as number of unique data entries, as well as the feature data types. 
+
+```{python}
+df.nunique()
+```
+
+```{python}
+df.dtypes
+```
+
+We can see that the `sex` column is unique, with only two unique options. 
+
+```{python}
+df['sex'].unique()
+```
+
+The chest pain column is also as expected with no missing values. It should be a scale of 1-4 indicating severity of chest pain in the patient. 
+
+```{python}
+df['cp'].unique()
+```
+
+We can see that there are missing values from the `thal` column. Thalassemia (`thal`) is a test of blood flow through the heart during a stress test of some kind of physical activity in the patient. We are going to have to fix that as this would be a good indicator of heart disease. 
+
+```{python}
+df['thal'].unique()
+```
+
+In fact, it is the only column with `null` values present.
+
+```{python}
+df.isnull().sum()
+```
+
+To fix this, we will impute the number based on the mean of the other data in the `thal` column. This will allow us to use the other data in the column, without having to remove it becuase it is incomplete. 
+
+```{python}
+df_imputed = df.fillna(df.mean())
+```
+
+After imputing the values, there are now no `null` values present in the dataset. 
+
+```{python}
+df_imputed.isnull().sum()
+```
+
+We will also check for duplicate rows. We can see that there are none.
+
+```{python}
+duplicated = df_imputed.duplicated().sum()
+print(f'There are {duplicated} duplicated rows')
+```
+
+### Creating the Target
+
+Because we are trying to predict whether someone is prone to having heart disease, we are going to make a new column. If there is no heart disease, the value will stay 0, but if there is any other presence (1-4) it will indicate that with a one. Either there is a presence, or there isn't.
+
+```{python}
+df_imputed['disease_binary'] = (df_imputed['num'] > 0).astype(int)
+```
+
+### Handling Outliers
+
+We know there is going to be some presence of outliers, so we are doing to implement a Interquartile Range method to identify and remove outliers that will effect our models performance. 
+
+```{python}
+continous_features = ['age','trestbps','chol','thalach','oldpeak']
+def outliers(df_out, drop = False):
+    for each_feature in df_out.columns:
+        feature_data = df_out[each_feature]
+        Q1 = np.percentile(feature_data, 25.)
+        Q3 = np.percentile(feature_data, 75.)
+        IQR = Q3-Q1
+        outlier_step = IQR * 1.5
+        outliers = feature_data[~((feature_data >= Q1 - outlier_step) & (feature_data <= Q3 + outlier_step))].index.tolist()
+        if not drop:
+            print('For the feature {}, No of Outliers is {}'.format(each_feature, len(outliers)))
+        if drop:
+            df.drop(outliers, inplace = True, errors = 'ignore')
+            print('Outliers from {} feature removed'.format(each_feature))
+
+outliers(df_imputed[continous_features])
+
+outliers(df_imputed[continous_features], drop=True)
+
+df_cleaned = df_imputed.copy()
+```
+
+## Data Exploration
+
+In this section a series of charts will be generated and commented on in regards to their validity and what they tell us about the data. 
+
+In this we are able to see that while no exactly split, the distribution between diseased and not diseased is even enough to get accurate results. 
+
+```{python}
+df_cleaned['disease'] = df_cleaned['num'].apply(lambda x: 'Yes' if x != 0 else 'No')
+percent_diseased = df_cleaned['disease'].value_counts(normalize=True) * 100
+
+plt.figure(figsize=(8, 6))
+sns.countplot(x='disease', data=df_cleaned)
+plt.title('Distribution of Disease')
+plt.xlabel('Disease')
+plt.ylabel('Count')
+plt.show()
+
+percent_diseased
+```
+
+One factor of note, as shown in the following chart, is that there are far more men with heart disease, than women. The distribution of males and females is relatively even, with a slight lean towards males. 
+
+```{python}
+sex_df = df_cleaned.copy()
+sex_df['sex'] = sex_df['sex'].apply(lambda x: 'Female' if x == 0 else 'Male')
+
+plt.figure(figsize=(8, 6))
+sns.countplot(x='sex', hue='disease', data=sex_df)
+plt.title('Sex Distribution by Disease')
+plt.xlabel('Sex')
+plt.ylabel('Count')
+plt.legend(title='Disease')
+plt.show()
+```
+
+The following chart highlights that while various types of chest pain occur, the absence of typical/atypical/non-anginal pain (classified as Type 4) is paradoxically the strongest indicator among these categories for the presence of heart disease within this specific dataset. Conversely, reporting non-anginal pain (Type 3) is most common among those without heart disease.
+
+- Chest Pain Type 1 (Typical Angina)
+- Chest Pain Type 2 (Atypical Angina)
+- Chest Pain Type 3 (Non-anginal Pain)
+- Chest Pain Type 4 (Asymptomatic)
+
+```{python}
+plt.figure(figsize=(8, 6))
+sns.countplot(x='cp', hue='disease', data=df_cleaned)
+plt.title('Chest Pain Type Distribution by Disease')
+plt.xlabel('Chest Pain Type')
+plt.ylabel('Count')
+plt.legend(title='Disease')
+plt.show()
+```
+
+As would be expected, we can see that there are normal distributions on the rest of our data feautes, as demonstrated below. 
+
+```{python}
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(15, 10))
+axes = axes.flatten()
+
+for i, feature in enumerate(continous_features):
+    sns.histplot(df_cleaned[feature], kde=True, ax=axes[i])
+    axes[i].set_title(f'Distribution of {feature}')
+
+for i in range(len(continous_features), len(axes)):
+  axes[i].axis('off')
+
+plt.tight_layout()
+plt.show()
+```
+
+The following is a correlation confusion matrix between all the features. 
+
+```{python}
+sns.set(style="white")
+plt.rcParams['figure.figsize'] = (15, 10)
+numerical_df = df_cleaned.select_dtypes(include=np.number)
+sns.heatmap(numerical_df.corr(), annot = True, linewidths=.5, cmap="Blues")
+plt.title('Corelation Between Variables', fontsize = 30)
+plt.show()
+```
+
+## Model Generation
+
+```{python}
+#| echo: false
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, recall_score, precision_score
+from sklearn.preprocessing import StandardScaler
+```
+
+### Preparing Features and Target
+
+Separating the dataset into features (X) and the target variable (y). The target variable is the binary column indicating the presence of heart disease. This step ensures the model focuses only on relevant predictors.
+
+```{python}
+feature_cols = [col for col in df_cleaned.columns if col not in ['num', 'disease_binary', 'disease', 'disease_label']]
+X = df_cleaned[feature_cols]
+y = df_cleaned['disease_binary']
+
+print(f"\n--- Preparing for Modeling ---")
+print(f"Features shape: {X.shape}")
+print(f"Target shape: {y.shape}")
+print(f"Target distribution:\n{y.value_counts()}")
+```
+
+### Splitting Data
+
+Splitting the data into training (80%) and testing (20%) sets. Stratification ensures the target variable's distribution is consistent across both sets, which is important for balanced evaluation.
+
+```{python}
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+print(f"Train set shape: {X_train.shape}, Test set shape: {X_test.shape}")
+```
+
+### Scaling Numeric Columns
+
+Identifying numeric columns that need scaling to standardize their ranges. Categorical numeric columns (e.g., sex, cp) are excluded since they represent discrete categories, not continuous values.
+
+```{python}
+numeric_cols_to_scale = X_train.select_dtypes(include=np.number).columns.tolist()
+known_categorical_numeric = ['sex', 'cp', 'fbs', 'restecg', 'exang', 'slope', 'ca', 'thal']
+numeric_cols_final = [col for col in numeric_cols_to_scale if col not in known_categorical_numeric]
+numeric_cols_final = [col for col in numeric_cols_final if col in X_train.columns]
+
+print(f"\nNumeric columns identified for scaling: {numeric_cols_final}")
+```
+
+Standardizing numeric features to have a mean of 0 and a standard deviation of 1. This helps Gradient Boosting models perform better by ensuring all features are on the same scale.
+
+```{python}
+scaler = StandardScaler()
+
+X_train_scaled = X_train.copy()
+X_test_scaled = X_test.copy()
+
+X_train_scaled[numeric_cols_final] = scaler.fit_transform(X_train[numeric_cols_final])
+X_test_scaled[numeric_cols_final] = scaler.transform(X_test[numeric_cols_final])
+
+print("Features scaled.")
+print("Scaled Train Data Head:\n", X_train_scaled.head())
+```
+
+### Training the Model
+
+Training a Gradient Boosting Classifier with 100 estimators, a learning rate of 0.1, and a maximum tree depth of 3. Gradient Boosting combines multiple weak learners (decision trees) to create a strong predictive model.
+
+```{python}
+gb_model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
+gb_model.fit(X_train_scaled, y_train)
+print("Model training complete.")
+```
+
+Generating predictions for both the training and testing datasets. These predictions will be used to evaluate the model's performance.
+
+```{python}
+y_pred_train = gb_model.predict(X_train_scaled)
+y_pred_test = gb_model.predict(X_test_scaled)
+```
+
+Evaluating the model's performance using metrics like accuracy, recall, and precision. The classification report provides a detailed breakdown of the model's performance for each class (disease vs. no disease).
+
+```{python}
+train_accuracy = accuracy_score(y_train, y_pred_train)
+test_accuracy = accuracy_score(y_test, y_pred_test)
+recall = recall_score(y_test, y_pred_test)
+precision = precision_score(y_test, y_pred_test)
+print(f"Training Accuracy: {train_accuracy:.4f}")
+print(f"Test Accuracy: {test_accuracy:.4f}")
+print(f"Recall: {recall:.4f}")
+print(f"Precision: {precision:.4f}")
+
+print("\nClassification Report (Test Set):")
+print(classification_report(y_test, y_pred_test, target_names=['No Disease (0)', 'Disease (1)']))
+```
+
+Plotting the confusion matrix as a heatmap for easier interpretation of the model's performance. This visualization highlights the balance between true positives, true negatives, false positives, and false negatives. 
+
+```{python}
+cm = confusion_matrix(y_test, y_pred_test)
+
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['No Disease (0)', 'Disease (1)'], yticklabels=['No Disease (0)', 'Disease (1)'])
+plt.title('Confusion Matrix (Test Set)')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+```
+
+### Hyper Parameter Tuning
+
+Setting up a grid of hyperparameter for the Gradient Boosting model. The grid includes different values for the number of estimators, learning rate, maximum tree depth, and subsample ratio. GridSearchCV will test all combinations of these parameters using 5-fold cross-validation to find the best configuration for maximizing the F1-score.
+
+```{python}
+param_grid = {
+    'n_estimators': [50, 100, 150, 200],
+    'learning_rate': [0.01, 0.05, 0.1, 0.2],
+    'max_depth': [3, 4, 5],
+    'subsample': [0.8, 0.9, 1.0]
+}
+
+gb_base = GradientBoostingClassifier(random_state=42)
+
+grid_search = GridSearchCV(estimator=gb_base, param_grid=param_grid,
+                           cv=5, n_jobs=-1, verbose=1, scoring='f1')
+```
+
+Running the grid search to train and evaluate the model for each combination of hyperparameters. Once complete, the best parameters and their corresponding cross-validation F1-score are displayed.
+
+```{python}
+grid_search.fit(X_train_scaled, y_train)
+
+print(f"Best Parameters found: {grid_search.best_params_}")
+print(f"Best cross-validation F1-score: {grid_search.best_score_:.4f}")
+```
+
+Using the best model from the grid search to make predictions on the training and testing datasets. The tuned model's performance is evaluated using metrics like accuracy, recall, and precision, and a classification report is generated for the test set.
+
+```{python}
+best_gb_model = grid_search.best_estimator_
+
+y_pred_test_tuned = best_gb_model.predict(X_test_scaled)
+y_pred_train_tuned = best_gb_model.predict(X_train_scaled)
+
+train_accuracy_tuned = accuracy_score(y_train, y_pred_train_tuned)
+test_accuracy_tuned = accuracy_score(y_test, y_pred_test_tuned)
+recall_tuned = recall_score(y_test, y_pred_test_tuned)
+precision_tuned = precision_score(y_test, y_pred_test_tuned)
+
+print(f"Tuned Training Accuracy: {train_accuracy_tuned:.4f}")
+print(f"Tuned Test Accuracy: {test_accuracy_tuned:.4f}")
+print(f"Tuned Recall: {recall_tuned:.4f}")
+print(f"Tuned Precision: {precision_tuned:.4f}")
+
+print("\nClassification Report (Tuned Test Set):")
+print(classification_report(y_test, y_pred_test_tuned, target_names=['No Disease (0)', 'Disease (1)']))
+
+```
+
+Here is a new confusion matrix. This should highlight the improved performance at correctly predicting true positives and true negatives. 
+
+```{python}
+cm_tuned = confusion_matrix(y_test, y_pred_test_tuned)
+print(cm_tuned)
+
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm_tuned, annot=True, fmt='d', cmap='Greens', xticklabels=['No Disease (0)', 'Disease (1)'], yticklabels=['No Disease (0)', 'Disease (1)'])
+plt.title('Confusion Matrix (Tuned Test Set)')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+```
+
+Analyzing the importance of each feature in the tuned model. A bar chart is generated to visualize which features contribute the most to the model's predictions. The top 3 features are highlighted with their relative importance percentages.
+
+```{python}
+feature_importances_tuned = best_gb_model.feature_importances_
+importance_df_tuned = pd.DataFrame({'Feature': X.columns, 'Importance': feature_importances_tuned})
+importance_df_tuned = importance_df_tuned.sort_values(by='Importance', ascending=False)
+
+plt.figure(figsize=(10, 8))
+sns.barplot(x='Importance', y='Feature', data=importance_df_tuned)
+plt.title('Tuned Gradient Boosting Feature Importance')
+plt.show()
+
+importance_df_tuned['Relative Importance'] = importance_df_tuned['Importance'] / importance_df_tuned['Importance'].sum()
+top_3_features_tuned = importance_df_tuned.head(3)
+top_3_features_tuned['Relative Importance'] = (top_3_features_tuned['Relative Importance'] * 100).round(0).astype(int)
+print("\nTop 3 Features (Tuned Model):\n", top_3_features_tuned[['Feature', 'Relative Importance']])
+```
+
+```{python}
+feature_importances = gb_model.feature_importances_
+importance_df = pd.DataFrame({'Feature': X.columns, 'Importance': feature_importances})
+importance_df = importance_df.sort_values(by='Importance', ascending=False)
+
+importance_df['Relative Importance'] = importance_df['Importance'] / importance_df['Importance'].sum()
+
+top_3_features = importance_df.head(3)
+
+top_3_features['Relative Importance'] = (top_3_features['Relative Importance'] * 100).round(0).astype(int)
+
+top_3_features[['Feature', 'Relative Importance']]
+```
+
+```{python}
+print("\nTop 5 Features:")
+importance_df.head()
+```
