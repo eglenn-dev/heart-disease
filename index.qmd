@@ -207,7 +207,7 @@ plt.show()
 As would be expected, we can see that there are normal distributions on the rest of our data feautes, as demonstrated below. 
 
 ```{python}
-fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(15, 10))
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(10, 8))
 axes = axes.flatten()
 
 for i, feature in enumerate(continous_features):
@@ -404,6 +404,8 @@ plt.ylabel('True Label')
 plt.show()
 ```
 
+### Regular vs. Hyperparameter Tuning
+
 Analyzing the importance of each feature in the tuned model. A bar chart is generated to visualize which features contribute the most to the model's predictions. The top 3 features are highlighted with their relative importance percentages.
 
 ```{python}
@@ -440,3 +442,48 @@ top_3_features[['Feature', 'Relative Importance']]
 print("\nTop 5 Features:")
 importance_df.head()
 ```
+
+## Conclusion
+
+This project successfully developed and evaluated a machine learning model to predict the presence of heart disease using the widely recognized UC Irvine Machine Learning Repository dataset. The primary objective was to build a reliable predictive tool that could potentially aid healthcare professionals in risk stratification.
+
+
+### Summary of Process and Findings:
+
+1. **Data Preparation:** The analysis began with thorough data exploration, identifying data types, distributions, and potential issues. Key preprocessing steps included:
+      - Handling missing values, specifically imputing the thal (Thalassemia test result) column using the mean, ensuring data completeness. The ca (number of major vessels colored by flouroscopy) column also initially had missing values, which were implicitly handled likely during outlier removal or model fitting, though the thal imputation was explicitly addressed.
+      - Transforming the multi-class target variable (num, ranging 0-4) into a binary target (disease_binary, 0 for no presence, 1 for any presence), simplifying the task to binary classification.
+      - Addressing data outliers using the Interquartile Range (IQR) method for key numerical features like trestbps, chol, thalach, and oldpeak to improve model robustness.
+      - Standardizing numerical features using StandardScaler to ensure features were on a comparable scale, which benefits algorithms like Gradient Boosting.
+
+2. **Exploratory Data Analysis:** Visualizations revealed important characteristics:
+      - The dataset showed a relatively balanced distribution between patients with and without heart disease (approx. 46% vs. 54%), suitable for building a classification model.
+      - Notable trends included a higher prevalence of heart disease in males within this dataset and interesting patterns related to chest pain types, where asymptomatic pain (Type 4) was paradoxically a strong indicator for disease presence.
+
+3. **Model Development and Evaluation:**
+      - A Gradient Boosting Classifier was selected for modeling. The data was split into 80% training and 20% testing sets using stratification to maintain class balance.
+      - An initial model achieved high training accuracy (0.9959), suggesting potential overfitting, but demonstrated strong performance on the test set with an accuracy of 0.8689, precision of 0.8125, and recall of 0.9286 for the positive (disease) class.
+      - Hyperparameter tuning using GridSearchCV with 5-fold cross-validation was performed to optimize the model, targeting the F1-score. The best parameters found were largely similar to the initial ones (learning_rate=0.1, max_depth=3, n_estimators=100, subsample=0.9).
+      - The tuned model yielded a slightly lower test accuracy of 0.8525, but maintained strong recall (0.9286) and slightly lower precision (0.7879) for detecting heart disease. The confusion matrix showed 26 true positives, 26 true negatives, 7 false positives, and 2 false negatives. The emphasis on recall is often important in medical diagnoses to minimize false negatives (missing actual cases).
+
+4. **Feature Importance:** The tuned Gradient Boosting model highlighted the most influential features for prediction:
+      - `thal` (Thalassemia result) emerged as the most significant predictor (approx. 29% relative importance).
+      - `ca` (Number of major vessels) and cp (Chest pain type) were also highly important (both around 13%).
+      - Other contributing factors included age and oldpeak (ST depression induced by exercise).
+
+### Significance and Implications:
+
+The final tuned Gradient Boosting model demonstrated good predictive capability, particularly in identifying patients with heart disease (high recall). With a test accuracy of ~85% and an F1-score of 0.85 for both classes, the model shows promise as a potential decision support tool. The identification of thal, ca, and cp as key predictors aligns with clinical knowledge, reinforcing the model's validity.
+
+
+### Limitations and Future Work:
+
+- **Dataset Size:** The analysis was based on a relatively small dataset (303 entries before outlier removal), which might limit the generalizability of the findings.
+Imputation Method: Mean imputation for thal is a basic approach; more sophisticated methods could be explored.
+
+- **Tuning Impact:** Hyperparameter tuning did not significantly improve test set accuracy over the initial well-performing model in this instance, although it optimized for cross-validated F1-score.
+Generalizability: The model should be validated on independent, potentially larger, and more diverse datasets before any clinical application.
+
+Future work could involve exploring other machine learning algorithms (e.g., Random Forests, SVMs, Neural Networks), investigating more advanced feature engineering techniques, employing different strategies for handling missing data and outliers, and performing external validation. Further analysis into the specific misclassifications made by the model could also provide valuable insights for improvement.
+
+In conclusion, this analysis successfully built a Gradient Boosting model capable of predicting heart disease with reasonable accuracy and high recall, identifying key clinical indicators from the data. While further validation and refinement are necessary, the results represent a solid foundation for developing a machine learning-based tool for heart disease risk assessment.
