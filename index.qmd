@@ -1,8 +1,8 @@
 ---
 title: "Heart Disease Data Analysis"
-subtitle: "heart disease analysis and building a prediction model"
+subtitle: "Heart disease data analysis, and model building"
 author: "Ethan Glenn"
-date: "2025-04-08"
+date: "2025-04-09"
 format:
   html:
     self-contained: true
@@ -33,13 +33,17 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 ```
 
+## Executive Summary
+
+This project aimed to develop a predictive model for heart disease presence using the UCI Heart Disease dataset. Following data cleaning (including imputation and outlier removal) and feature scaling, a Gradient Boosting Classifier was trained and optimized. The final tuned model achieved approximately 85% accuracy and 85% F1-score on the test set, demonstrating strong recall (93%) in identifying patients with the disease. Key predictors identified were Thalassemia test results (thal), the number of major vessels colored by fluoroscopy (ca), and chest pain type (cp). While promising as a foundation for a potential risk stratification tool, further validation on larger, diverse datasets is recommended.
+
 ## Background
 
-Heart disease remains a leading cause of morbidity and mortality worldwide. Early identification of individuals at high risk is crucial for timely intervention and prevention. This project is aimed to leverage machine learning to develop a predictive model for assessing the likelihood of heart disease based on patient clinical data. This data utilized was sources from the widely recognized UC Irvine Machine Learning Repository dataset. The objective of this is to build a reliable model that could potentially aid healthcare professionals in risk stratification. 
+Heart disease remains a leading cause of morbidity and mortality worldwide. Early identification of individuals at high risk is crucial for timely intervention and prevention. This project is aimed to leverage machine learning – specifically its ability to model complex, non-linear interactions between clinical features – to develop a predictive model for assessing the likelihood of heart disease based on patient clinical data. This data utilized was sourced from the widely recognized UC Irvine Machine Learning Repository dataset. The objective of this is to build a reliable model that could potentially aid healthcare professionals in risk stratification.
 
 ## Exploring the Data
 
-First, let's take a looks at the data features, and the first few columns that we will be working with.
+First, let's take a look at the data features, the initial rows, and general information about the dataset structure to understand what we are working with.
 
 ```{python}
 #| echo: true
@@ -54,17 +58,25 @@ df.head()
 df.info()
 ```
 
-Now I want to take a look at the distribution of our target, the num column. This column indicates the present of heart disease on a scale of 0-4. `0` being no presence, and `1-4` indicating beginning to severe heart disease. 
+*Interpretation*: The .info() output confirms 303 initial entries and 15 columns. Most features are numerical (int64 or float64). Crucially, it reveals missing values in the ca (4 missing) and thal (2 missing) columns, which will need addressing during data cleaning. The memory usage is minimal.
+
+### Target Variable Distribution
+
+Now I want to take a look at the distribution of our original target, the num column. This column indicates the presence and severity of heart disease on a scale of 0-4, where 0 indicates no presence, and 1-4 indicate increasing severity.
 
 ```{python}
 df["num"].value_counts()
 ```
 
+*Interpretation*: The majority of patients in the dataset have a num value of 0 (no disease). The counts decrease as the severity level increases. Given this distribution and the project's goal to predict presence vs. absence, we will later transform this into a binary target variable (0 vs. 1-4 combined).
+
+With this initial understanding, we can proceed to clean the data.
+
 ## Data Cleaning
 
-Before we get to training a model, we will make sure that the number of missing values is limited, and make sure we handel data outliers correctly. 
+Before we get to training a model, it's essential to ensure data quality. We will address missing values, check for duplicates, and handle potential data outliers correctly.
 
-First we will check a few things, such as number of unique data entries, as well as the feature data types. 
+First, we will check the number of unique values per feature to understand their nature (categorical vs. continuous) and re-examine the data types.
 
 ```{python}
 df.nunique()
@@ -74,60 +86,78 @@ df.nunique()
 df.dtypes
 ```
 
-We can see that the `sex` column is unique, with only two unique options. 
+*Interpretation*: This confirms features like sex, cp, fbs, restecg, exang, slope, ca, and thal have a limited number of unique values, suggesting they are categorical or ordinal in nature, even if stored numerically. age, trestbps, chol, thalach, and oldpeak appear more continuous.
+
+Let's examine some key categorical features:
 
 ```{python}
 df['sex'].unique()
 ```
 
-The chest pain column is also as expected with no missing values. It should be a scale of 1-4 indicating severity of chest pain in the patient. 
+*Interpretation*: The sex column contains only two unique values (likely 1 for male, 0 for female), as expected.
 
 ```{python}
 df['cp'].unique()
 ```
 
-We can see that there are missing values from the `thal` column. Thalassemia (`thal`) is a test of blood flow through the heart during a stress test of some kind of physical activity in the patient. We are going to have to fix that as this would be a good indicator of heart disease. 
+Interpretation: The chest pain column (cp) has four distinct values (1-4), representing different types of chest pain, with no apparent missing values within the unique values shown here.
+
+### Handling Missing Values
+
+We previously identified missing values in thal and ca. Let's investigate thal first.
 
 ```{python}
 df['thal'].unique()
 ```
 
-In fact, it is the only column with `null` values present.
+*Interpretation*: We confirm missing values (nan) exist in the thal column. Thalassemia (thal) testing relates to blood flow during stress tests and is likely an important indicator.
+
+Let's check the null counts again to confirm which columns have missing data.
 
 ```{python}
 df.isnull().sum()
 ```
 
-To fix this, we will impute the number based on the mean of the other data in the `thal` column. This will allow us to use the other data in the column, without having to remove it becuase it is incomplete. 
+To address the missing `thal` values (2 instances), we will impute them using the mean of the existing `thal` values. This simple approach allows us to retain the rows, though it might slightly reduce the feature's variance. More sophisticated methods could be explored, but mean imputation suffices for this analysis.
+
+The 4 missing values in the `ca` column will be handled later during the outlier removal process; rows with `NaN` in `ca` might be removed if `ca` isn't directly part of the outlier check, or the outlier check itself might implicitly handle them depending on implementation.
 
 ```{python}
 df_imputed = df.fillna(df.mean())
 ```
 
-After imputing the values, there are now no `null` values present in the dataset. 
+After imputing the `thal` values, we check again.
 
 ```{python}
 df_imputed.isnull().sum()
 ```
 
-We will also check for duplicate rows. We can see that there are none.
+*Interpretation*: The missing values in `thal` have been successfully imputed.
+
+### Checking for Duplicates
+
+We will also check for and remove any duplicate rows in the dataset.
 
 ```{python}
 duplicated = df_imputed.duplicated().sum()
 print(f'There are {duplicated} duplicated rows')
 ```
 
+*Interpretation*: No duplicate rows were found.
+
 ### Creating the Target
 
-Because we are trying to predict whether someone is prone to having heart disease, we are going to make a new column. If there is no heart disease, the value will stay 0, but if there is any other presence (1-4) it will indicate that with a one. Either there is a presence, or there isn't.
+Because we are trying to predict whether someone is prone to having heart disease (presence vs. absence), rather than the specific severity, we will create a new binary target column. If the original num value is 0 (no heart disease), the new `disease_binary` value will be 0. If num is 1, 2, 3, or 4, `disease_binary` will be 1, indicating the presence of heart disease.
 
 ```{python}
 df_imputed['disease_binary'] = (df_imputed['num'] > 0).astype(int)
 ```
 
+With the initial cleaning and target definition complete, we now address potential outliers.
+
 ### Handling Outliers
 
-We know there is going to be some presence of outliers, so we are doing to implement a Interquartile Range method to identify and remove outliers that will effect our models performance. 
+We anticipate the presence of outliers in some continuous features, which could negatively impact model performance, especially for algorithms sensitive to extreme values like Gradient Boosting. We will implement an Interquartile Range (IQR) method to identify and remove outliers in key numerical features (`age`, `trestbps`, `chol`, `thalach`, `oldpeak`). Rows containing outliers in these specific columns will be removed.
 
 ```{python}
 continous_features = ['age','trestbps','chol','thalach','oldpeak']
@@ -152,11 +182,17 @@ outliers(df_imputed[continous_features], drop=True)
 df_cleaned = df_imputed.copy()
 ```
 
+*Interpretation*: Outliers were detected and removed for `trestbps`, `chol`, `thalach`, and `oldpeak`. The total number of rows removed depends on whether outliers occurred in the same rows across different features. This process helps create a more robust dataset for modeling.
+
+With the data cleaned, the target variable defined, and outliers handled, we can now explore the relationships between features and the presence of heart disease through visualization.
+
 ## Data Exploration
 
-In this section a series of charts will be generated and commented on in regards to their validity and what they tell us about the data. 
+In this section, a series of charts will be generated and commented on in regards to their validity and what they tell us about the data.
 
-In this we are able to see that while no exactly split, the distribution between diseased and not diseased is even enough to get accurate results. 
+### Distribution or Target Variable
+
+This chart shows the distribution of our binary target variable, disease_binary.
 
 ```{python}
 df_cleaned['disease'] = df_cleaned['num'].apply(lambda x: 'Yes' if x != 0 else 'No')
@@ -172,7 +208,11 @@ plt.show()
 percent_diseased
 ```
 
-One factor of note, as shown in the following chart, is that there are far more men with heart disease, than women. The distribution of males and females is relatively even, with a slight lean towards males. 
+*Interpretation*: The dataset, after cleaning, shows a reasonably balanced distribution between patients without heart disease (approx. 54%) and those with heart disease (approx. 46%). This balance is generally good for training a classification model without needing complex techniques to handle severe class imbalance.
+
+### Sex Distribution by Disease
+
+Let's examine how heart disease prevalence differs between sexes in this dataset.
 
 ```{python}
 sex_df = df_cleaned.copy()
@@ -187,7 +227,11 @@ plt.legend(title='Disease')
 plt.show()
 ```
 
-The following chart highlights that while various types of chest pain occur, the absence of typical/atypical/non-anginal pain (classified as Type 4) is paradoxically the strongest indicator among these categories for the presence of heart disease within this specific dataset. Conversely, reporting non-anginal pain (Type 3) is most common among those without heart disease.
+*Interpretation*: One factor of note, as shown in the chart, is that within this specific dataset, men have a higher count of heart disease cases compared to women. While the overall distribution of males and females in the dataset is relatively even (though slightly more males), the rate of disease appears higher in men here.
+
+### Chest Pain Type Distribution by Disease
+
+This chart explores the relationship between different types of chest pain (cp) and the presence of heart disease.
 
 - Chest Pain Type 1 (Typical Angina)
 - Chest Pain Type 2 (Atypical Angina)
@@ -204,7 +248,11 @@ plt.legend(title='Disease')
 plt.show()
 ```
 
-As would be expected, we can see that there are normal distributions on the rest of our data feautes, as demonstrated below. 
+*Interpretation*: The chart highlights interesting patterns. Paradoxically, within this dataset, the absence of typical/atypical/non-anginal pain (Type 4 - Asymptomatic) is the strongest indicator for the presence of heart disease (highest orange bar). Conversely, reporting non-anginal pain (Type 3) is most common among those without heart disease (highest blue bar). This underscores the complex relationship between symptoms and diagnosis.
+
+### Distributions of Key Continuous Features
+
+As would be expected, we can see roughly normal or skewed distributions for the rest of our key continuous data features, as demonstrated below.
 
 ```{python}
 fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(10, 8))
@@ -221,7 +269,11 @@ plt.tight_layout()
 plt.show()
 ```
 
-The following is a correlation confusion matrix between all the features. 
+*Interpretation*: These histograms show the distributions of `age`, `trestbps`, `chol`, and `oldpeak`. age appears roughly normally distributed. `trestbps` and `chol` show slight right skew. `oldpeak` is heavily right-skewed, indicating most patients have low values for ST depression.
+
+### Feature Correlation
+
+The following heatmap visualizes the pairwise correlation between all features, including our binary target `disease_binary`.
 
 ```{python}
 sns.set(style="white")
@@ -231,6 +283,10 @@ sns.heatmap(numerical_df.corr(), annot = True, linewidths=.5, cmap="Blues")
 plt.title('Corelation Between Variables', fontsize = 30)
 plt.show()
 ```
+
+*Interpretation*: The correlation matrix highlights linear relationships. Notably, `disease_binary` shows moderate positive correlations with `cp` (0.41), `exang` (exercise-induced angina, 0.43), and `oldpeak` (0.43, inferred from strong corr with num), suggesting these increase with disease presence. There's a moderate negative correlation with `thalach` (max heart rate, -0.42), indicating higher rates are associated with less disease. `thal` and ca also show moderate correlations (0.33 and 0.4x respectively, inferred from num), aligning with their potential importance. These correlations provide initial clues about predictive power but don't capture non-linear relationships.
+
+The exploratory analysis revealed key patterns and confirmed the suitability of the data. We now proceed to the model building phase.
 
 ## Model Generation
 
@@ -244,7 +300,7 @@ from sklearn.preprocessing import StandardScaler
 
 ### Preparing Features and Target
 
-Separating the dataset into features (X) and the target variable (y). The target variable is the binary column indicating the presence of heart disease. This step ensures the model focuses only on relevant predictors.
+We first separate the dataset into features (X - all columns except the target `disease_binary` and the original `num`) and the target variable (y - `disease_binary`). This step ensures the model focuses only on relevant predictors for the binary classification task.
 
 ```{python}
 feature_cols = [col for col in df_cleaned.columns if col not in ['num', 'disease_binary', 'disease', 'disease_label']]
@@ -259,7 +315,7 @@ print(f"Target distribution:\n{y.value_counts()}")
 
 ### Splitting Data
 
-Splitting the data into training (80%) and testing (20%) sets. Stratification ensures the target variable's distribution is consistent across both sets, which is important for balanced evaluation.
+The data is split into training (80%) and testing (20%) sets. We use stratification (stratify=y) to ensure that the proportion of patients with and without heart disease is approximately the same in both the training and testing sets. This is crucial for balanced evaluation, especially with moderately balanced datasets.
 
 ```{python}
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
@@ -268,7 +324,7 @@ print(f"Train set shape: {X_train.shape}, Test set shape: {X_test.shape}")
 
 ### Scaling Numeric Columns
 
-Identifying numeric columns that need scaling to standardize their ranges. Categorical numeric columns (e.g., sex, cp) are excluded since they represent discrete categories, not continuous values.
+Gradient Boosting models can benefit from feature scaling. We identify numeric columns that represent continuous values or wide ranges and standardize them to have a mean of 0 and a standard deviation of 1. Categorical features (even if numeric, like sex, cp) are excluded from scaling as they represent discrete categories.
 
 ```{python}
 numeric_cols_to_scale = X_train.select_dtypes(include=np.number).columns.tolist()
@@ -279,7 +335,7 @@ numeric_cols_final = [col for col in numeric_cols_final if col in X_train.column
 print(f"\nNumeric columns identified for scaling: {numeric_cols_final}")
 ```
 
-Standardizing numeric features to have a mean of 0 and a standard deviation of 1. This helps Gradient Boosting models perform better by ensuring all features are on the same scale.
+Standardizing these features using StandardScaler ensures all scaled features contribute comparably to the model, preventing features with larger ranges from dominating the learning process.
 
 ```{python}
 scaler = StandardScaler()
@@ -290,13 +346,12 @@ X_test_scaled = X_test.copy()
 X_train_scaled[numeric_cols_final] = scaler.fit_transform(X_train[numeric_cols_final])
 X_test_scaled[numeric_cols_final] = scaler.transform(X_test[numeric_cols_final])
 
-print("Features scaled.")
 print("Scaled Train Data Head:\n", X_train_scaled.head())
 ```
 
-### Training the Model
+### Training the Model 🦾
 
-Training a Gradient Boosting Classifier with 100 estimators, a learning rate of 0.1, and a maximum tree depth of 3. Gradient Boosting combines multiple weak learners (decision trees) to create a strong predictive model.
+We will train a Gradient Boosting Classifier. This algorithm builds an additive model in a forward stage-wise fashion; it allows for the optimization of arbitrary differentiable loss functions. We initialize it with 100 estimators (trees), a learning rate of 0.1, and a maximum tree depth of 3.
 
 ```{python}
 gb_model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)

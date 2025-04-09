@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Ethan Glenn">
-<meta name="dcterms.date" content="2025-04-08">
+<meta name="dcterms.date" content="2025-04-09">
 
 <title>Heart Disease Data Analysis</title>
 <style>
@@ -3089,7 +3089,7 @@ vertical-align: -.125em;
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-page">
       <div class="quarto-title-block"><div><h1 class="title">Heart Disease Data Analysis</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> See code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li></ul></div></div>
-            <p class="subtitle lead">heart disease analysis and building a prediction model</p>
+            <p class="subtitle lead">Heart disease data analysis, and model building</p>
                       </div>
   </div>
     
@@ -3106,7 +3106,7 @@ vertical-align: -.125em;
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">April 8, 2025</p>
+        <p class="date">April 9, 2025</p>
       </div>
     </div>
     
@@ -3126,20 +3126,33 @@ vertical-align: -.125em;
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
+  <li><a href="#executive-summary" id="toc-executive-summary">Executive Summary</a></li>
   <li><a href="#background" id="toc-background">Background</a></li>
-  <li><a href="#exploring-the-data" id="toc-exploring-the-data">Exploring the Data</a></li>
+  <li><a href="#exploring-the-data" id="toc-exploring-the-data">Exploring the Data</a>
+  <ul>
+  <li><a href="#target-variable-distribution" id="toc-target-variable-distribution">Target Variable Distribution</a></li>
+  </ul></li>
   <li><a href="#data-cleaning" id="toc-data-cleaning">Data Cleaning</a>
   <ul>
+  <li><a href="#handling-missing-values" id="toc-handling-missing-values">Handling Missing Values</a></li>
+  <li><a href="#checking-for-duplicates" id="toc-checking-for-duplicates">Checking for Duplicates</a></li>
   <li><a href="#creating-the-target" id="toc-creating-the-target">Creating the Target</a></li>
   <li><a href="#handling-outliers" id="toc-handling-outliers">Handling Outliers</a></li>
   </ul></li>
-  <li><a href="#data-exploration" id="toc-data-exploration">Data Exploration</a></li>
+  <li><a href="#data-exploration" id="toc-data-exploration">Data Exploration</a>
+  <ul>
+  <li><a href="#distribution-or-target-variable" id="toc-distribution-or-target-variable">Distribution or Target Variable</a></li>
+  <li><a href="#sex-distribution-by-disease" id="toc-sex-distribution-by-disease">Sex Distribution by Disease</a></li>
+  <li><a href="#chest-pain-type-distribution-by-disease" id="toc-chest-pain-type-distribution-by-disease">Chest Pain Type Distribution by Disease</a></li>
+  <li><a href="#distributions-of-key-continuous-features" id="toc-distributions-of-key-continuous-features">Distributions of Key Continuous Features</a></li>
+  <li><a href="#feature-correlation" id="toc-feature-correlation">Feature Correlation</a></li>
+  </ul></li>
   <li><a href="#model-generation" id="toc-model-generation">Model Generation</a>
   <ul>
   <li><a href="#preparing-features-and-target" id="toc-preparing-features-and-target">Preparing Features and Target</a></li>
   <li><a href="#splitting-data" id="toc-splitting-data">Splitting Data</a></li>
   <li><a href="#scaling-numeric-columns" id="toc-scaling-numeric-columns">Scaling Numeric Columns</a></li>
-  <li><a href="#training-the-model" id="toc-training-the-model">Training the Model</a></li>
+  <li><a href="#training-the-model" id="toc-training-the-model">Training the Model 🦾</a></li>
   <li><a href="#hyper-parameter-tuning" id="toc-hyper-parameter-tuning">Hyper Parameter Tuning</a></li>
   <li><a href="#regular-vs.-hyperparameter-tuning" id="toc-regular-vs.-hyperparameter-tuning">Regular vs. Hyperparameter Tuning</a></li>
   </ul></li>
@@ -3151,20 +3164,24 @@ vertical-align: -.125em;
   </ul></li>
   </ul>
 </nav>
+<section id="executive-summary" class="level2">
+<h2 class="anchored" data-anchor-id="executive-summary">Executive Summary</h2>
+<p>This project aimed to develop a predictive model for heart disease presence using the UCI Heart Disease dataset. Following data cleaning (including imputation and outlier removal) and feature scaling, a Gradient Boosting Classifier was trained and optimized. The final tuned model achieved approximately 85% accuracy and 85% F1-score on the test set, demonstrating strong recall (93%) in identifying patients with the disease. Key predictors identified were Thalassemia test results (thal), the number of major vessels colored by fluoroscopy (ca), and chest pain type (cp). While promising as a foundation for a potential risk stratification tool, further validation on larger, diverse datasets is recommended.</p>
+</section>
 <section id="background" class="level2">
 <h2 class="anchored" data-anchor-id="background">Background</h2>
-<p>Heart disease remains a leading cause of morbidity and mortality worldwide. Early identification of individuals at high risk is crucial for timely intervention and prevention. This project is aimed to leverage machine learning to develop a predictive model for assessing the likelihood of heart disease based on patient clinical data. This data utilized was sources from the widely recognized UC Irvine Machine Learning Repository dataset. The objective of this is to build a reliable model that could potentially aid healthcare professionals in risk stratification.</p>
+<p>Heart disease remains a leading cause of morbidity and mortality worldwide. Early identification of individuals at high risk is crucial for timely intervention and prevention. This project is aimed to leverage machine learning – specifically its ability to model complex, non-linear interactions between clinical features – to develop a predictive model for assessing the likelihood of heart disease based on patient clinical data. This data utilized was sourced from the widely recognized UC Irvine Machine Learning Repository dataset. The objective of this is to build a reliable model that could potentially aid healthcare professionals in risk stratification.</p>
 </section>
 <section id="exploring-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="exploring-the-data">Exploring the Data</h2>
-<p>First, let’s take a looks at the data features, and the first few columns that we will be working with.</p>
-<div id="f41e6cd0" class="cell" data-execution_count="2">
+<p>First, let’s take a look at the data features, the initial rows, and general information about the dataset structure to understand what we are working with.</p>
+<div id="47ca158e" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&#39;heart-disease.csv&#39;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="66169b4c" class="cell" data-execution_count="3">
+<div id="3061997a" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3291,7 +3308,7 @@ vertical-align: -.125em;
 </div>
 </div>
 </div>
-<div id="951ea69c" class="cell" data-execution_count="4">
+<div id="be5bd6ab" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3321,8 +3338,11 @@ dtypes: float64(3), int64(12)
 memory usage: 35.6 KB</code></pre>
 </div>
 </div>
-<p>Now I want to take a look at the distribution of our target, the num column. This column indicates the present of heart disease on a scale of 0-4. <code>0</code> being no presence, and <code>1-4</code> indicating beginning to severe heart disease.</p>
-<div id="4da8cc88" class="cell" data-execution_count="5">
+<p><em>Interpretation</em>: The .info() output confirms 303 initial entries and 15 columns. Most features are numerical (int64 or float64). Crucially, it reveals missing values in the ca (4 missing) and thal (2 missing) columns, which will need addressing during data cleaning. The memory usage is minimal.</p>
+<section id="target-variable-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="target-variable-distribution">Target Variable Distribution</h3>
+<p>Now I want to take a look at the distribution of our original target, the num column. This column indicates the presence and severity of heart disease on a scale of 0-4, where 0 indicates no presence, and 1-4 indicate increasing severity.</p>
+<div id="d0e67ac1" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">&quot;num&quot;</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3337,12 +3357,15 @@ memory usage: 35.6 KB</code></pre>
 Name: count, dtype: int64</code></pre>
 </div>
 </div>
+<p><em>Interpretation</em>: The majority of patients in the dataset have a num value of 0 (no disease). The counts decrease as the severity level increases. Given this distribution and the project’s goal to predict presence vs. absence, we will later transform this into a binary target variable (0 vs. 1-4 combined).</p>
+<p>With this initial understanding, we can proceed to clean the data.</p>
+</section>
 </section>
 <section id="data-cleaning" class="level2">
 <h2 class="anchored" data-anchor-id="data-cleaning">Data Cleaning</h2>
-<p>Before we get to training a model, we will make sure that the number of missing values is limited, and make sure we handel data outliers correctly.</p>
-<p>First we will check a few things, such as number of unique data entries, as well as the feature data types.</p>
-<div id="95820b8c" class="cell" data-execution_count="6">
+<p>Before we get to training a model, it’s essential to ensure data quality. We will address missing values, check for duplicates, and handle potential data outliers correctly.</p>
+<p>First, we will check the number of unique values per feature to understand their nature (categorical vs. continuous) and re-examine the data types.</p>
+<div id="567bb7e2" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df.nunique()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3366,7 +3389,7 @@ num             5
 dtype: int64</code></pre>
 </div>
 </div>
-<div id="394fb132" class="cell" data-execution_count="7">
+<div id="ef5ee058" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df.dtypes</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3390,8 +3413,9 @@ num             int64
 dtype: object</code></pre>
 </div>
 </div>
-<p>We can see that the <code>sex</code> column is unique, with only two unique options.</p>
-<div id="f487b3bf" class="cell" data-execution_count="8">
+<p><em>Interpretation</em>: This confirms features like sex, cp, fbs, restecg, exang, slope, ca, and thal have a limited number of unique values, suggesting they are categorical or ordinal in nature, even if stored numerically. age, trestbps, chol, thalach, and oldpeak appear more continuous.</p>
+<p>Let’s examine some key categorical features:</p>
+<div id="8dc84efa" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">&#39;sex&#39;</span>].unique()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3400,8 +3424,8 @@ dtype: object</code></pre>
 <pre><code>array([1, 0])</code></pre>
 </div>
 </div>
-<p>The chest pain column is also as expected with no missing values. It should be a scale of 1-4 indicating severity of chest pain in the patient.</p>
-<div id="05946de3" class="cell" data-execution_count="9">
+<p><em>Interpretation</em>: The sex column contains only two unique values (likely 1 for male, 0 for female), as expected.</p>
+<div id="156ec5e5" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">&#39;cp&#39;</span>].unique()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3410,8 +3434,11 @@ dtype: object</code></pre>
 <pre><code>array([1, 4, 3, 2])</code></pre>
 </div>
 </div>
-<p>We can see that there are missing values from the <code>thal</code> column. Thalassemia (<code>thal</code>) is a test of blood flow through the heart during a stress test of some kind of physical activity in the patient. We are going to have to fix that as this would be a good indicator of heart disease.</p>
-<div id="992b3ed5" class="cell" data-execution_count="10">
+<p>Interpretation: The chest pain column (cp) has four distinct values (1-4), representing different types of chest pain, with no apparent missing values within the unique values shown here.</p>
+<section id="handling-missing-values" class="level3">
+<h3 class="anchored" data-anchor-id="handling-missing-values">Handling Missing Values</h3>
+<p>We previously identified missing values in thal and ca. Let’s investigate thal first.</p>
+<div id="cc96f2ad" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">&#39;thal&#39;</span>].unique()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3420,8 +3447,9 @@ dtype: object</code></pre>
 <pre><code>array([ 6.,  3.,  7., nan])</code></pre>
 </div>
 </div>
-<p>In fact, it is the only column with <code>null</code> values present.</p>
-<div id="42dc4829" class="cell" data-execution_count="11">
+<p><em>Interpretation</em>: We confirm missing values (nan) exist in the thal column. Thalassemia (thal) testing relates to blood flow during stress tests and is likely an important indicator.</p>
+<p>Let’s check the null counts again to confirm which columns have missing data.</p>
+<div id="55926c5b" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>df.isnull().<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3445,15 +3473,16 @@ num           0
 dtype: int64</code></pre>
 </div>
 </div>
-<p>To fix this, we will impute the number based on the mean of the other data in the <code>thal</code> column. This will allow us to use the other data in the column, without having to remove it becuase it is incomplete.</p>
-<div id="95b1a4f7" class="cell" data-execution_count="12">
+<p>To address the missing <code>thal</code> values (2 instances), we will impute them using the mean of the existing <code>thal</code> values. This simple approach allows us to retain the rows, though it might slightly reduce the feature’s variance. More sophisticated methods could be explored, but mean imputation suffices for this analysis.</p>
+<p>The 4 missing values in the <code>ca</code> column will be handled later during the outlier removal process; rows with <code>NaN</code> in <code>ca</code> might be removed if <code>ca</code> isn’t directly part of the outlier check, or the outlier check itself might implicitly handle them depending on implementation.</p>
+<div id="a866eaf6" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>df_imputed <span class="op">=</span> df.fillna(df.mean())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>After imputing the values, there are now no <code>null</code> values present in the dataset.</p>
-<div id="39c8376d" class="cell" data-execution_count="13">
+<p>After imputing the <code>thal</code> values, we check again.</p>
+<div id="0aa1dc52" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>df_imputed.isnull().<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3477,8 +3506,12 @@ num           0
 dtype: int64</code></pre>
 </div>
 </div>
-<p>We will also check for duplicate rows. We can see that there are none.</p>
-<div id="d6c20966" class="cell" data-execution_count="14">
+<p><em>Interpretation</em>: The missing values in <code>thal</code> have been successfully imputed.</p>
+</section>
+<section id="checking-for-duplicates" class="level3">
+<h3 class="anchored" data-anchor-id="checking-for-duplicates">Checking for Duplicates</h3>
+<p>We will also check for and remove any duplicate rows in the dataset.</p>
+<div id="2dbee1ed" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>duplicated <span class="op">=</span> df_imputed.duplicated().<span class="bu">sum</span>()</span>
@@ -3488,20 +3521,23 @@ dtype: int64</code></pre>
 <pre><code>There are 0 duplicated rows</code></pre>
 </div>
 </div>
+<p><em>Interpretation</em>: No duplicate rows were found.</p>
+</section>
 <section id="creating-the-target" class="level3">
 <h3 class="anchored" data-anchor-id="creating-the-target">Creating the Target</h3>
-<p>Because we are trying to predict whether someone is prone to having heart disease, we are going to make a new column. If there is no heart disease, the value will stay 0, but if there is any other presence (1-4) it will indicate that with a one. Either there is a presence, or there isn’t.</p>
-<div id="fbbe6930" class="cell" data-execution_count="15">
+<p>Because we are trying to predict whether someone is prone to having heart disease (presence vs. absence), rather than the specific severity, we will create a new binary target column. If the original num value is 0 (no heart disease), the new <code>disease_binary</code> value will be 0. If num is 1, 2, 3, or 4, <code>disease_binary</code> will be 1, indicating the presence of heart disease.</p>
+<div id="29b2f298" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>df_imputed[<span class="st">&#39;disease_binary&#39;</span>] <span class="op">=</span> (df_imputed[<span class="st">&#39;num&#39;</span>] <span class="op">&gt;</span> <span class="dv">0</span>).astype(<span class="bu">int</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<p>With the initial cleaning and target definition complete, we now address potential outliers.</p>
 </section>
 <section id="handling-outliers" class="level3">
 <h3 class="anchored" data-anchor-id="handling-outliers">Handling Outliers</h3>
-<p>We know there is going to be some presence of outliers, so we are doing to implement a Interquartile Range method to identify and remove outliers that will effect our models performance.</p>
-<div id="aa091c12" class="cell" data-execution_count="16">
+<p>We anticipate the presence of outliers in some continuous features, which could negatively impact model performance, especially for algorithms sensitive to extreme values like Gradient Boosting. We will implement an Interquartile Range (IQR) method to identify and remove outliers in key numerical features (<code>age</code>, <code>trestbps</code>, <code>chol</code>, <code>thalach</code>, <code>oldpeak</code>). Rows containing outliers in these specific columns will be removed.</p>
+<div id="f2fed6d4" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>continous_features <span class="op">=</span> [<span class="st">&#39;age&#39;</span>,<span class="st">&#39;trestbps&#39;</span>,<span class="st">&#39;chol&#39;</span>,<span class="st">&#39;thalach&#39;</span>,<span class="st">&#39;oldpeak&#39;</span>]</span>
@@ -3538,13 +3574,17 @@ Outliers from thalach feature removed
 Outliers from oldpeak feature removed</code></pre>
 </div>
 </div>
+<p><em>Interpretation</em>: Outliers were detected and removed for <code>trestbps</code>, <code>chol</code>, <code>thalach</code>, and <code>oldpeak</code>. The total number of rows removed depends on whether outliers occurred in the same rows across different features. This process helps create a more robust dataset for modeling.</p>
+<p>With the data cleaned, the target variable defined, and outliers handled, we can now explore the relationships between features and the presence of heart disease through visualization.</p>
 </section>
 </section>
 <section id="data-exploration" class="level2">
 <h2 class="anchored" data-anchor-id="data-exploration">Data Exploration</h2>
-<p>In this section a series of charts will be generated and commented on in regards to their validity and what they tell us about the data.</p>
-<p>In this we are able to see that while no exactly split, the distribution between diseased and not diseased is even enough to get accurate results.</p>
-<div id="3852328b" class="cell" data-execution_count="17">
+<p>In this section, a series of charts will be generated and commented on in regards to their validity and what they tell us about the data.</p>
+<section id="distribution-or-target-variable" class="level3">
+<h3 class="anchored" data-anchor-id="distribution-or-target-variable">Distribution or Target Variable</h3>
+<p>This chart shows the distribution of our binary target variable, disease_binary.</p>
+<div id="35b648f1" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>df_cleaned[<span class="st">&#39;disease&#39;</span>] <span class="op">=</span> df_cleaned[<span class="st">&#39;num&#39;</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="st">&#39;Yes&#39;</span> <span class="cf">if</span> x <span class="op">!=</span> <span class="dv">0</span> <span class="cf">else</span> <span class="st">&#39;No&#39;</span>)</span>
@@ -3573,8 +3613,12 @@ Yes    45.874587
 Name: proportion, dtype: float64</code></pre>
 </div>
 </div>
-<p>One factor of note, as shown in the following chart, is that there are far more men with heart disease, than women. The distribution of males and females is relatively even, with a slight lean towards males.</p>
-<div id="583c5bb1" class="cell" data-execution_count="18">
+<p><em>Interpretation</em>: The dataset, after cleaning, shows a reasonably balanced distribution between patients without heart disease (approx. 54%) and those with heart disease (approx. 46%). This balance is generally good for training a classification model without needing complex techniques to handle severe class imbalance.</p>
+</section>
+<section id="sex-distribution-by-disease" class="level3">
+<h3 class="anchored" data-anchor-id="sex-distribution-by-disease">Sex Distribution by Disease</h3>
+<p>Let’s examine how heart disease prevalence differs between sexes in this dataset.</p>
+<div id="35e90330" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>sex_df <span class="op">=</span> df_cleaned.copy()</span>
@@ -3596,14 +3640,18 @@ Name: proportion, dtype: float64</code></pre>
 </div>
 </div>
 </div>
-<p>The following chart highlights that while various types of chest pain occur, the absence of typical/atypical/non-anginal pain (classified as Type 4) is paradoxically the strongest indicator among these categories for the presence of heart disease within this specific dataset. Conversely, reporting non-anginal pain (Type 3) is most common among those without heart disease.</p>
+<p><em>Interpretation</em>: One factor of note, as shown in the chart, is that within this specific dataset, men have a higher count of heart disease cases compared to women. While the overall distribution of males and females in the dataset is relatively even (though slightly more males), the rate of disease appears higher in men here.</p>
+</section>
+<section id="chest-pain-type-distribution-by-disease" class="level3">
+<h3 class="anchored" data-anchor-id="chest-pain-type-distribution-by-disease">Chest Pain Type Distribution by Disease</h3>
+<p>This chart explores the relationship between different types of chest pain (cp) and the presence of heart disease.</p>
 <ul>
 <li>Chest Pain Type 1 (Typical Angina)</li>
 <li>Chest Pain Type 2 (Atypical Angina)</li>
 <li>Chest Pain Type 3 (Non-anginal Pain)</li>
 <li>Chest Pain Type 4 (Asymptomatic)</li>
 </ul>
-<div id="950f7232" class="cell" data-execution_count="19">
+<div id="7f6638f6" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
@@ -3622,8 +3670,12 @@ Name: proportion, dtype: float64</code></pre>
 </div>
 </div>
 </div>
-<p>As would be expected, we can see that there are normal distributions on the rest of our data feautes, as demonstrated below.</p>
-<div id="b7f02122" class="cell" data-execution_count="20">
+<p><em>Interpretation</em>: The chart highlights interesting patterns. Paradoxically, within this dataset, the absence of typical/atypical/non-anginal pain (Type 4 - Asymptomatic) is the strongest indicator for the presence of heart disease (highest orange bar). Conversely, reporting non-anginal pain (Type 3) is most common among those without heart disease (highest blue bar). This underscores the complex relationship between symptoms and diagnosis.</p>
+</section>
+<section id="distributions-of-key-continuous-features" class="level3">
+<h3 class="anchored" data-anchor-id="distributions-of-key-continuous-features">Distributions of Key Continuous Features</h3>
+<p>As would be expected, we can see roughly normal or skewed distributions for the rest of our key continuous data features, as demonstrated below.</p>
+<div id="09cada65" class="cell" data-execution_count="20">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(nrows<span class="op">=</span><span class="dv">3</span>, ncols<span class="op">=</span><span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">8</span>))</span>
@@ -3647,8 +3699,12 @@ Name: proportion, dtype: float64</code></pre>
 </div>
 </div>
 </div>
-<p>The following is a correlation confusion matrix between all the features.</p>
-<div id="542ff931" class="cell" data-execution_count="21">
+<p><em>Interpretation</em>: These histograms show the distributions of <code>age</code>, <code>trestbps</code>, <code>chol</code>, and <code>oldpeak</code>. age appears roughly normally distributed. <code>trestbps</code> and <code>chol</code> show slight right skew. <code>oldpeak</code> is heavily right-skewed, indicating most patients have low values for ST depression.</p>
+</section>
+<section id="feature-correlation" class="level3">
+<h3 class="anchored" data-anchor-id="feature-correlation">Feature Correlation</h3>
+<p>The following heatmap visualizes the pairwise correlation between all features, including our binary target <code>disease_binary</code>.</p>
+<div id="fe567981" class="cell" data-execution_count="21">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>sns.<span class="bu">set</span>(style<span class="op">=</span><span class="st">&quot;white&quot;</span>)</span>
@@ -3666,13 +3722,16 @@ Name: proportion, dtype: float64</code></pre>
 </div>
 </div>
 </div>
+<p><em>Interpretation</em>: The correlation matrix highlights linear relationships. Notably, <code>disease_binary</code> shows moderate positive correlations with <code>cp</code> (0.41), <code>exang</code> (exercise-induced angina, 0.43), and <code>oldpeak</code> (0.43, inferred from strong corr with num), suggesting these increase with disease presence. There’s a moderate negative correlation with <code>thalach</code> (max heart rate, -0.42), indicating higher rates are associated with less disease. <code>thal</code> and ca also show moderate correlations (0.33 and 0.4x respectively, inferred from num), aligning with their potential importance. These correlations provide initial clues about predictive power but don’t capture non-linear relationships.</p>
+<p>The exploratory analysis revealed key patterns and confirmed the suitability of the data. We now proceed to the model building phase.</p>
+</section>
 </section>
 <section id="model-generation" class="level2">
 <h2 class="anchored" data-anchor-id="model-generation">Model Generation</h2>
 <section id="preparing-features-and-target" class="level3">
 <h3 class="anchored" data-anchor-id="preparing-features-and-target">Preparing Features and Target</h3>
-<p>Separating the dataset into features (X) and the target variable (y). The target variable is the binary column indicating the presence of heart disease. This step ensures the model focuses only on relevant predictors.</p>
-<div id="4d23281a" class="cell" data-execution_count="23">
+<p>We first separate the dataset into features (X - all columns except the target <code>disease_binary</code> and the original <code>num</code>) and the target variable (y - <code>disease_binary</code>). This step ensures the model focuses only on relevant predictors for the binary classification task.</p>
+<div id="42a789e5" class="cell" data-execution_count="23">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>feature_cols <span class="op">=</span> [col <span class="cf">for</span> col <span class="kw">in</span> df_cleaned.columns <span class="cf">if</span> col <span class="kw">not</span> <span class="kw">in</span> [<span class="st">&#39;num&#39;</span>, <span class="st">&#39;disease_binary&#39;</span>, <span class="st">&#39;disease&#39;</span>, <span class="st">&#39;disease_label&#39;</span>]]</span>
@@ -3699,8 +3758,8 @@ Name: count, dtype: int64</code></pre>
 </section>
 <section id="splitting-data" class="level3">
 <h3 class="anchored" data-anchor-id="splitting-data">Splitting Data</h3>
-<p>Splitting the data into training (80%) and testing (20%) sets. Stratification ensures the target variable’s distribution is consistent across both sets, which is important for balanced evaluation.</p>
-<div id="cc6fb182" class="cell" data-execution_count="24">
+<p>The data is split into training (80%) and testing (20%) sets. We use stratification (stratify=y) to ensure that the proportion of patients with and without heart disease is approximately the same in both the training and testing sets. This is crucial for balanced evaluation, especially with moderately balanced datasets.</p>
+<div id="5a6fe2e2" class="cell" data-execution_count="24">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">42</span>, stratify<span class="op">=</span>y)</span>
@@ -3713,8 +3772,8 @@ Name: count, dtype: int64</code></pre>
 </section>
 <section id="scaling-numeric-columns" class="level3">
 <h3 class="anchored" data-anchor-id="scaling-numeric-columns">Scaling Numeric Columns</h3>
-<p>Identifying numeric columns that need scaling to standardize their ranges. Categorical numeric columns (e.g., sex, cp) are excluded since they represent discrete categories, not continuous values.</p>
-<div id="4aef8b97" class="cell" data-execution_count="25">
+<p>Gradient Boosting models can benefit from feature scaling. We identify numeric columns that represent continuous values or wide ranges and standardize them to have a mean of 0 and a standard deviation of 1. Categorical features (even if numeric, like sex, cp) are excluded from scaling as they represent discrete categories.</p>
+<div id="abffffd1" class="cell" data-execution_count="25">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>numeric_cols_to_scale <span class="op">=</span> X_train.select_dtypes(include<span class="op">=</span>np.number).columns.tolist()</span>
@@ -3729,8 +3788,8 @@ Name: count, dtype: int64</code></pre>
 Numeric columns identified for scaling: [&#39;Unnamed: 0&#39;, &#39;age&#39;, &#39;trestbps&#39;, &#39;chol&#39;, &#39;thalach&#39;, &#39;oldpeak&#39;]</code></pre>
 </div>
 </div>
-<p>Standardizing numeric features to have a mean of 0 and a standard deviation of 1. This helps Gradient Boosting models perform better by ensuring all features are on the same scale.</p>
-<div id="e450ad33" class="cell" data-execution_count="26">
+<p>Standardizing these features using StandardScaler ensures all scaled features contribute comparably to the model, preventing features with larger ranges from dominating the learning process.</p>
+<div id="63a0a26f" class="cell" data-execution_count="26">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> StandardScaler()</span>
@@ -3741,12 +3800,10 @@ Numeric columns identified for scaling: [&#39;Unnamed: 0&#39;, &#39;age&#39;, &#
 <span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>X_train_scaled[numeric_cols_final] <span class="op">=</span> scaler.fit_transform(X_train[numeric_cols_final])</span>
 <span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>X_test_scaled[numeric_cols_final] <span class="op">=</span> scaler.transform(X_test[numeric_cols_final])</span>
 <span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;Features scaled.&quot;</span>)</span>
-<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;Scaled Train Data Head:</span><span class="ch">\n</span><span class="st">&quot;</span>, X_train_scaled.head())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;Scaled Train Data Head:</span><span class="ch">\n</span><span class="st">&quot;</span>, X_train_scaled.head())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Features scaled.
-Scaled Train Data Head:
+<pre><code>Scaled Train Data Head:
       Unnamed: 0       age  sex  cp  trestbps      chol  fbs  restecg  \
 180    0.399085 -0.729485    1   4 -0.395692  0.458139    0        2   
 208    0.722786  0.050166    1   2 -0.054513  0.230598    0        0   
@@ -3764,9 +3821,9 @@ Scaled Train Data Head:
 </div>
 </section>
 <section id="training-the-model" class="level3">
-<h3 class="anchored" data-anchor-id="training-the-model">Training the Model</h3>
-<p>Training a Gradient Boosting Classifier with 100 estimators, a learning rate of 0.1, and a maximum tree depth of 3. Gradient Boosting combines multiple weak learners (decision trees) to create a strong predictive model.</p>
-<div id="442d8422" class="cell" data-execution_count="27">
+<h3 class="anchored" data-anchor-id="training-the-model">Training the Model 🦾</h3>
+<p>We will train a Gradient Boosting Classifier. This algorithm builds an additive model in a forward stage-wise fashion; it allows for the optimization of arbitrary differentiable loss functions. We initialize it with 100 estimators (trees), a learning rate of 0.1, and a maximum tree depth of 3.</p>
+<div id="a1e8d811" class="cell" data-execution_count="27">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>gb_model <span class="op">=</span> GradientBoostingClassifier(n_estimators<span class="op">=</span><span class="dv">100</span>, learning_rate<span class="op">=</span><span class="fl">0.1</span>, max_depth<span class="op">=</span><span class="dv">3</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
@@ -3778,7 +3835,7 @@ Scaled Train Data Head:
 </div>
 </div>
 <p>Generating predictions for both the training and testing datasets. These predictions will be used to evaluate the model’s performance.</p>
-<div id="3cfffa04" class="cell" data-execution_count="28">
+<div id="32957b4a" class="cell" data-execution_count="28">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>y_pred_train <span class="op">=</span> gb_model.predict(X_train_scaled)</span>
@@ -3786,7 +3843,7 @@ Scaled Train Data Head:
 </details>
 </div>
 <p>Evaluating the model’s performance using metrics like accuracy, recall, and precision. The classification report provides a detailed breakdown of the model’s performance for each class (disease vs. no disease).</p>
-<div id="c7a9842b" class="cell" data-execution_count="29">
+<div id="efd4a418" class="cell" data-execution_count="29">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>train_accuracy <span class="op">=</span> accuracy_score(y_train, y_pred_train)</span>
@@ -3820,7 +3877,7 @@ No Disease (0)       0.93      0.82      0.87        33
 </div>
 </div>
 <p>Plotting the confusion matrix as a heatmap for easier interpretation of the model’s performance. This visualization highlights the balance between true positives, true negatives, false positives, and false negatives.</p>
-<div id="4c506311" class="cell" data-execution_count="30">
+<div id="d93b53d5" class="cell" data-execution_count="30">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_pred_test)</span>
@@ -3844,7 +3901,7 @@ No Disease (0)       0.93      0.82      0.87        33
 <section id="hyper-parameter-tuning" class="level3">
 <h3 class="anchored" data-anchor-id="hyper-parameter-tuning">Hyper Parameter Tuning</h3>
 <p>Setting up a grid of hyperparameter for the Gradient Boosting model. The grid includes different values for the number of estimators, learning rate, maximum tree depth, and subsample ratio. GridSearchCV will test all combinations of these parameters using 5-fold cross-validation to find the best configuration for maximizing the F1-score.</p>
-<div id="58e28251" class="cell" data-execution_count="31">
+<div id="568ab209" class="cell" data-execution_count="31">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
@@ -3861,7 +3918,7 @@ No Disease (0)       0.93      0.82      0.87        33
 </details>
 </div>
 <p>Running the grid search to train and evaluate the model for each combination of hyperparameters. Once complete, the best parameters and their corresponding cross-validation F1-score are displayed.</p>
-<div id="0f463767" class="cell" data-execution_count="32">
+<div id="2ea77113" class="cell" data-execution_count="32">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>grid_search.fit(X_train_scaled, y_train)</span>
@@ -3876,7 +3933,7 @@ Best cross-validation F1-score: 0.7993</code></pre>
 </div>
 </div>
 <p>Using the best model from the grid search to make predictions on the training and testing datasets. The tuned model’s performance is evaluated using metrics like accuracy, recall, and precision, and a classification report is generated for the test set.</p>
-<div id="e6344b3c" class="cell" data-execution_count="33">
+<div id="1760b5d1" class="cell" data-execution_count="33">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>best_gb_model <span class="op">=</span> grid_search.best_estimator_</span>
@@ -3916,7 +3973,7 @@ No Disease (0)       0.93      0.79      0.85        33
 </div>
 </div>
 <p>Here is a new confusion matrix. This should highlight the improved performance at correctly predicting true positives and true negatives.</p>
-<div id="27163a8a" class="cell" data-execution_count="34">
+<div id="709d7c71" class="cell" data-execution_count="34">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>cm_tuned <span class="op">=</span> confusion_matrix(y_test, y_pred_test_tuned)</span>
@@ -3945,7 +4002,7 @@ No Disease (0)       0.93      0.79      0.85        33
 <section id="regular-vs.-hyperparameter-tuning" class="level3">
 <h3 class="anchored" data-anchor-id="regular-vs.-hyperparameter-tuning">Regular vs. Hyperparameter Tuning</h3>
 <p>Analyzing the importance of each feature in the tuned model. A bar chart is generated to visualize which features contribute the most to the model’s predictions. The top 3 features are highlighted with their relative importance percentages.</p>
-<div id="a42faec8" class="cell" data-execution_count="35">
+<div id="ce995c0c" class="cell" data-execution_count="35">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>feature_importances_tuned <span class="op">=</span> best_gb_model.feature_importances_</span>
@@ -3978,7 +4035,7 @@ Top 3 Features (Tuned Model):
 3       cp                   11</code></pre>
 </div>
 </div>
-<div id="882a7caf" class="cell" data-execution_count="36">
+<div id="68794528" class="cell" data-execution_count="36">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>feature_importances <span class="op">=</span> gb_model.feature_importances_</span>
@@ -4027,7 +4084,7 @@ Top 3 Features (Tuned Model):
 </div>
 </div>
 </div>
-<div id="feffe202" class="cell" data-execution_count="37">
+<div id="aa7d9565" class="cell" data-execution_count="37">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Top 5 Features:&quot;</span>)</span>
