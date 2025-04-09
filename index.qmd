@@ -118,9 +118,7 @@ Let's check the null counts again to confirm which columns have missing data.
 df.isnull().sum()
 ```
 
-To address the missing `thal` values (2 instances), we will impute them using the mean of the existing `thal` values. This simple approach allows us to retain the rows, though it might slightly reduce the feature's variance. More sophisticated methods could be explored, but mean imputation suffices for this analysis.
-
-The 4 missing values in the `ca` column will be handled later during the outlier removal process; rows with `NaN` in `ca` might be removed if `ca` isn't directly part of the outlier check, or the outlier check itself might implicitly handle them depending on implementation.
+To address the missing `thal` values (2 instances), and the missing `ca` values (4 instances), we will impute them using the mean of the existing values. This simple approach allows us to retain the rows, though it might slightly reduce the feature's variance. More sophisticated methods could be explored, but mean imputation suffices for this analysis.
 
 ```{python}
 df_imputed = df.fillna(df.mean())
@@ -459,7 +457,16 @@ plt.ylabel('True Label')
 plt.show()
 ```
 
-### Regular vs. Hyperparameter Tuning
+**Interpretation**: The confusion matrix for the tuned model on the test set [[26 7] [ 2 26]] shows:
+
+- **26 True Negatives (TN)**: Correctly identified patients without heart disease.
+- **7 False Positives (FP)**: Incorrectly classified patients without heart disease as having it.
+- **2 False Negatives (FN)**: Incorrectly classified patients with heart disease as not having it.
+- **26 True Positives (TP)**: Correctly identified patients with heart disease.
+
+This confirms the model's strong recall for detecting actual disease cases (only 2 missed), which aligns with the classification report and is often prioritized in medical contexts.
+
+### Feature Importance Analysis
 
 Analyzing the importance of each feature in the tuned model. A bar chart is generated to visualize which features contribute the most to the model's predictions. The top 3 features are highlighted with their relative importance percentages.
 
@@ -542,3 +549,5 @@ Generalizability: The model should be validated on independent, potentially larg
 Future work could involve exploring other machine learning algorithms (e.g., Random Forests, SVMs, Neural Networks), investigating more advanced feature engineering techniques, employing different strategies for handling missing data and outliers, and performing external validation. Further analysis into the specific misclassifications made by the model could also provide valuable insights for improvement.
 
 In conclusion, this analysis successfully built a Gradient Boosting model capable of predicting heart disease with reasonable accuracy and high recall, identifying key clinical indicators from the data. While further validation and refinement are necessary, the results represent a solid foundation for developing a machine learning-based tool for heart disease risk assessment.
+
+**Author:** [Ethan Glenn](https://eglenn.dev)
